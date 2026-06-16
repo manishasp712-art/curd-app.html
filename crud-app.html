@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CRUD App – Manage Records</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --card: #21253a;
+    --border: #2e3350;
+    --accent: #6c63ff;
+    --accent2: #48e5c2;
+    --text: #e8eaf0;
+    --muted: #7b82a0;
+    --danger: #ff5c7a;
+    --success: #48e5c2;
+    --warn: #f5a623;
+    --radius: 12px;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* Header */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 18px 40px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+  .logo span { color: var(--accent); }
+  .badge-row { display: flex; gap: 8px; margin-left: auto; }
+  .badge {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    text-transform: uppercase;
+  }
+  .badge-c { background: #1e3a2f; color: var(--success); }
+  .badge-r { background: #1a2c4a; color: #60a5fa; }
+  .badge-u { background: #3a2d10; color: var(--warn); }
+  .badge-d { background: #3a1a22; color: var(--danger); }
+
+  main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+
+  h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    letter-spacing: -1px;
+  }
+  .subtitle { color: var(--muted); font-size: 15px; margin-bottom: 36px; }
+
+  /* Stats */
+  .stats { display: flex; gap: 16px; margin-bottom: 36px; flex-wrap: wrap; }
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 24px;
+    flex: 1; min-width: 120px;
+  }
+  .stat-num { font-size: 28px; font-weight: 700; font-family: 'Space Grotesk', sans-serif; }
+  .stat-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+
+  /* Form */
+  .form-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    margin-bottom: 32px;
+  }
+  .form-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 17px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .form-title .icon {
+    width: 28px; height: 28px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px;
+  }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group.full { grid-column: 1 / -1; }
+  label { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; }
+  input, select, textarea {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: var(--text);
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+  textarea { resize: vertical; min-height: 70px; }
+  select option { background: var(--surface); }
+
+  .btn-row { display: flex; gap: 10px; margin-top: 20px; }
+  .btn {
+    padding: 10px 22px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.18s;
+    font-family: inherit;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: #5b53e0; transform: translateY(-1px); }
+  .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+  .btn-ghost:hover { color: var(--text); border-color: var(--text); }
+
+  /* Search */
+  .search-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .search-wrap { position: relative; flex: 1; min-width: 200px; }
+  .search-wrap input { width: 100%; padding-left: 36px; }
+  .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 15px; }
+
+  /* Table */
+  .table-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .table-header {
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .table-title { font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 600; }
+  .record-count { font-size: 12px; color: var(--muted); }
+
+  table { width: 100%; border-collapse: collapse; }
+  th {
+    background: var(--surface);
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    border-bottom: 1px solid var(--border);
+  }
+  td {
+    padding: 14px 16px;
+    font-size: 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(108,99,255,0.05); }
+
+  .cat-badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 20px;
+    text-transform: capitalize;
+  }
+  .cat-work { background: #1a2c4a; color: #60a5fa; }
+  .cat-personal { background: #2a1a3a; color: #c084fc; }
+  .cat-study { background: #1e3a2f; color: var(--success); }
+  .cat-other { background: #2a2a1a; color: var(--warn); }
+
+  .action-btn {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--muted);
+    padding: 5px 10px;
+    cursor: pointer;
+    font-size: 13px;
+    font-family: inherit;
+    transition: all 0.15s;
+  }
+  .action-btn:hover.edit { border-color: var(--warn); color: var(--warn); }
+  .action-btn:hover.del { border-color: var(--danger); color: var(--danger); }
+  .actions { display: flex; gap: 6px; }
+
+  /* Empty state */
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--muted);
+  }
+  .empty-icon { font-size: 40px; margin-bottom: 12px; }
+  .empty-state p { font-size: 14px; }
+
+  /* Toast */
+  #toast {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    opacity: 0;
+    transform: translateY(12px);
+    transition: all 0.3s;
+    z-index: 999;
+    pointer-events: none;
+  }
+  #toast.show { opacity: 1; transform: translateY(0); }
+
+  /* Modal */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 200;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 32px;
+    width: 100%;
+    max-width: 480px;
+    animation: popIn 0.2s ease;
+  }
+  @keyframes popIn {
+    from { opacity: 0; transform: scale(0.96); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+  .modal h2 { font-family: 'Space Grotesk', sans-serif; font-size: 20px; margin-bottom: 20px; }
+
+  @media (max-width: 600px) {
+    header { padding: 14px 16px; }
+    main { padding: 24px 14px; }
+    .form-grid { grid-template-columns: 1fr; }
+    .badge-row { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo"><span>C</span>RUD <span>App</span></div>
+  <div class="badge-row">
+    <span class="badge badge-c">Create</span>
+    <span class="badge badge-r">Read</span>
+    <span class="badge badge-u">Update</span>
+    <span class="badge badge-d">Delete</span>
+  </div>
+</header>
+
+<main>
+  <h1>Manage Your Records</h1>
+  <p class="subtitle">Add, view, edit, and delete records — all in one place.</p>
+
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-num" id="totalCount">0</div>
+      <div class="stat-label">Total Records</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="workCount" style="color:#60a5fa">0</div>
+      <div class="stat-label">Work</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="studyCount" style="color:var(--success)">0</div>
+      <div class="stat-label">Study</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="personalCount" style="color:#c084fc">0</div>
+      <div class="stat-label">Personal</div>
+    </div>
+  </div>
+
+  <!-- Create Form -->
+  <div class="form-card">
+    <div class="form-title"><div class="icon">✦</div> Add New Record</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Name *</label>
+        <input type="text" id="inp-name" placeholder="e.g. John Doe" />
+      </div>
+      <div class="form-group">
+        <label>Email *</label>
+        <input type="email" id="inp-email" placeholder="e.g. john@email.com" />
+      </div>
+      <div class="form-group">
+        <label>Category</label>
+        <select id="inp-cat">
+          <option value="work">Work</option>
+          <option value="personal">Personal</option>
+          <option value="study">Study</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Phone</label>
+        <input type="text" id="inp-phone" placeholder="e.g. +91 98765 43210" />
+      </div>
+      <div class="form-group full">
+        <label>Notes</label>
+        <textarea id="inp-notes" placeholder="Any additional notes..."></textarea>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="createRecord()">＋ Add Record</button>
+      <button class="btn btn-ghost" onclick="clearForm()">Clear</button>
+    </div>
+  </div>
+
+  <!-- Search & Filter -->
+  <div class="search-row">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInp" placeholder="Search by name or email…" oninput="renderTable()" />
+    </div>
+    <select id="filterCat" onchange="renderTable()" style="width:140px">
+      <option value="">All Categories</option>
+      <option value="work">Work</option>
+      <option value="personal">Personal</option>
+      <option value="study">Study</option>
+      <option value="other">Other</option>
+    </select>
+  </div>
+
+  <!-- Table -->
+  <div class="table-card">
+    <div class="table-header">
+      <div class="table-title">📋 Records</div>
+      <div class="record-count" id="recordCountLabel">0 records</div>
+    </div>
+    <div id="tableWrap">
+      <div class="empty-state">
+        <div class="empty-icon">📭</div>
+        <p>No records yet. Add your first one above!</p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Edit Modal -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <h2>✏️ Edit Record</h2>
+    <div class="form-grid">
+      <div class="form-group"><label>Name *</label><input id="e-name" /></div>
+      <div class="form-group"><label>Email *</label><input id="e-email" /></div>
+      <div class="form-group">
+        <label>Category</label>
+        <select id="e-cat">
+          <option value="work">Work</option>
+          <option value="personal">Personal</option>
+          <option value="study">Study</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Phone</label><input id="e-phone" /></div>
+      <div class="form-group full"><label>Notes</label><textarea id="e-notes"></textarea></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="saveEdit()">Save Changes</button>
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<script>
+  let records = JSON.parse(localStorage.getItem('crudRecords') || '[]');
+  let editId = null;
+
+  function save() {
+    localStorage.setItem('crudRecords', JSON.stringify(records));
+    updateStats();
+    renderTable();
+  }
+
+  function updateStats() {
+    document.getElementById('totalCount').textContent = records.length;
+    document.getElementById('workCount').textContent = records.filter(r => r.cat === 'work').length;
+    document.getElementById('studyCount').textContent = records.filter(r => r.cat === 'study').length;
+    document.getElementById('personalCount').textContent = records.filter(r => r.cat === 'personal').length;
+  }
+
+  function createRecord() {
+    const name = document.getElementById('inp-name').value.trim();
+    const email = document.getElementById('inp-email').value.trim();
+    if (!name || !email) { showToast('⚠️ Name and Email are required.', '#f5a623'); return; }
+    const rec = {
+      id: Date.now(),
+      name,
+      email,
+      cat: document.getElementById('inp-cat').value,
+      phone: document.getElementById('inp-phone').value.trim(),
+      notes: document.getElementById('inp-notes').value.trim(),
+      created: new Date().toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' })
+    };
+    records.unshift(rec);
+    save();
+    clearForm();
+    showToast('✅ Record created successfully!');
+  }
+
+  function clearForm() {
+    ['inp-name','inp-email','inp-phone','inp-notes'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('inp-cat').value = 'work';
+  }
+
+  function deleteRecord(id) {
+    if (!confirm('Delete this record? This cannot be undone.')) return;
+    records = records.filter(r => r.id !== id);
+    save();
+    showToast('🗑️ Record deleted.', '#ff5c7a');
+  }
+
+  function openEdit(id) {
+    const r = records.find(r => r.id === id);
+    if (!r) return;
+    editId = id;
+    document.getElementById('e-name').value = r.name;
+    document.getElementById('e-email').value = r.email;
+    document.getElementById('e-cat').value = r.cat;
+    document.getElementById('e-phone').value = r.phone;
+    document.getElementById('e-notes').value = r.notes;
+    document.getElementById('editModal').classList.add('open');
+  }
+
+  function closeModal() {
+    document.getElementById('editModal').classList.remove('open');
+    editId = null;
+  }
+
+  function saveEdit() {
+    const name = document.getElementById('e-name').value.trim();
+    const email = document.getElementById('e-email').value.trim();
+    if (!name || !email) { showToast('⚠️ Name and Email are required.', '#f5a623'); return; }
+    records = records.map(r => r.id === editId ? {
+      ...r, name, email,
+      cat: document.getElementById('e-cat').value,
+      phone: document.getElementById('e-phone').value.trim(),
+      notes: document.getElementById('e-notes').value.trim()
+    } : r);
+    save();
+    closeModal();
+    showToast('✏️ Record updated!', '#f5a623');
+  }
+
+  function renderTable() {
+    const q = document.getElementById('searchInp').value.toLowerCase();
+    const cat = document.getElementById('filterCat').value;
+    let filtered = records.filter(r => {
+      const matchQ = r.name.toLowerCase().includes(q) || r.email.toLowerCase().includes(q);
+      const matchC = !cat || r.cat === cat;
+      return matchQ && matchC;
+    });
+
+    document.getElementById('recordCountLabel').textContent = `${filtered.length} record${filtered.length !== 1 ? 's' : ''}`;
+
+    if (!filtered.length) {
+      document.getElementById('tableWrap').innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">${records.length ? '🔎' : '📭'}</div>
+          <p>${records.length ? 'No records match your search.' : 'No records yet. Add your first one above!'}</p>
+        </div>`;
+      return;
+    }
+
+    const rows = filtered.map(r => `
+      <tr>
+        <td><strong>${esc(r.name)}</strong></td>
+        <td style="color:var(--muted)">${esc(r.email)}</td>
+        <td><span class="cat-badge cat-${r.cat}">${r.cat}</span></td>
+        <td style="color:var(--muted)">${esc(r.phone) || '—'}</td>
+        <td style="color:var(--muted);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.notes) || '—'}</td>
+        <td style="color:var(--muted);font-size:12px">${r.created}</td>
+        <td>
+          <div class="actions">
+            <button class="action-btn edit" onclick="openEdit(${r.id})">✏️ Edit</button>
+            <button class="action-btn del" onclick="deleteRecord(${r.id})">🗑️ Delete</button>
+          </div>
+        </td>
+      </tr>`).join('');
+
+    document.getElementById('tableWrap').innerHTML = `
+      <table>
+        <thead><tr>
+          <th>Name</th><th>Email</th><th>Category</th><th>Phone</th><th>Notes</th><th>Added</th><th>Actions</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+  }
+
+  function esc(str) {
+    return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  let toastTimer;
+  function showToast(msg, color) {
+    const t = document.getElementById('toast');
+    t.innerHTML = msg;
+    t.style.borderLeftColor = color || 'var(--accent)';
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+  }
+
+  // Close modal on overlay click
+  document.getElementById('editModal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+
+  // Init
+  updateStats();
+  renderTable();
+</script>
+</body>
+</html>
